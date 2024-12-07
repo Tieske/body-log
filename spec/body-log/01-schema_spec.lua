@@ -15,31 +15,30 @@ end
 describe(PLUGIN_NAME .. ": (schema)", function()
 
 
-  it("accepts distinct request_header and response_header", function()
-    local ok, err = validate({
-        request_header = "My-Request-Header",
-        response_header = "Your-Response",
-      })
+  it("sets proper defaults", function()
+    local plugin, err = validate({})
     assert.is_nil(err)
-    assert.is_truthy(ok)
+    assert.are.same({
+        request = false,
+        response = false,
+        structured = true,
+      }, plugin.config)
   end)
 
 
-  it("does not accept identical request_header and response_header", function()
-    local ok, err = validate({
-        request_header = "they-are-the-same",
-        response_header = "they-are-the-same",
+  it("accepts proper configuration", function()
+    local plugin, err = validate({
+        request = true,
+        response = true,
+        structured = false,
       })
 
-    assert.is_same({
-      ["config"] = {
-        ["@entity"] = {
-          [1] = "values of these fields must be distinct: 'request_header', 'response_header'"
-        }
-      }
-    }, err)
-    assert.is_falsy(ok)
+    assert.is_nil(err)
+    assert.are.same({
+        request = true,
+        response = true,
+        structured = false,
+      }, plugin.config)
   end)
-
 
 end)
