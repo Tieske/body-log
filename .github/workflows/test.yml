@@ -24,10 +24,9 @@ jobs:
         - "3.4.x"
         - "stable"
         - "dev"
-        - "2.8.x.x"
         - "3.4.x.x"
         - "stable-ee"
-        - "dev-ee"
+        # - "dev-ee"
 
     steps:
     - uses: actions/checkout@v3
