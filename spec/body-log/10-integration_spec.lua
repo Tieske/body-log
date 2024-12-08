@@ -24,7 +24,7 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
 
       local route1 = bp.routes:insert({
-        paths = { "request/structured" },
+        paths = { "/request/structured" },
       })
       bp.plugins:insert {
         name = PLUGIN_NAME,
@@ -38,7 +38,7 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
 
       local route2 = bp.routes:insert({
-        paths = { "request/text" },
+        paths = { "/request/text" },
       })
       bp.plugins:insert {
         name = PLUGIN_NAME,
@@ -52,7 +52,7 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
 
       local route3 = bp.routes:insert({
-        paths = { "response/structured" },
+        paths = { "/response/structured" },
       })
       bp.plugins:insert {
         name = PLUGIN_NAME,
@@ -66,7 +66,7 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
 
       local route4 = bp.routes:insert({
-        paths = { "response/text" },
+        paths = { "/response/text" },
       })
       bp.plugins:insert {
         name = PLUGIN_NAME,
@@ -108,29 +108,42 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
     describe("structured", function()
 
-      describe("request", function()
-
-        pending("logs request body", function()
-          -- TODO: implement
-          assert.logfile(logfile).has.no.line("[error]", true)
-        end)
-
-        pending("doesn't log response body", function()
-          -- TODO: implement
-        end)
-
+      it("logs only request body", function()
+        assert(client:post("/request/structured", {
+          headers = {
+            ["Content-Type"] = "application/json",
+          },
+          body = {
+            hello = "world",
+          },
+        }))
+        ngx.sleep(1)
+        -- check request
+        local file_content = require("pl.utils").readfile(logfile)
+        local json = require("cjson").decode(file_content)
+        assert.same("world", json.request.body.hello)
+        -- check response
+        assert.is_nil(json.response.body)
       end)
 
-      describe("response", function()
 
-        pending("logs response body", function()
-          -- TODO: implement
-        end)
 
-        pending("doesn't log request body", function()
-          -- TODO: implement
-        end)
-
+      it("logs only response body", function()
+        assert(client:post("/response/structured", {
+          headers = {
+            ["Content-Type"] = "application/json",
+          },
+          body = {
+            hello = "world",
+          },
+        }))
+        ngx.sleep(1)
+        -- check request
+        local file_content = require("pl.utils").readfile(logfile)
+        local json = require("cjson").decode(file_content)
+        assert.is_nil(json.request.body)
+        -- check response
+        assert.same("world", json.response.body.post_data.params.hello)
       end)
 
     end)
@@ -139,48 +152,46 @@ for _, strategy in helpers.all_strategies() do if strategy ~= "cassandra" then
 
     describe("text", function()
 
-      describe("request", function()
-
-        pending("logs request body", function()
-          -- TODO: implement
-        end)
-
-        pending("doesn't log response body", function()
-          -- TODO: implement
-        end)
-
+      it("logs only request body", function()
+        assert(client:post("/request/text", {
+          headers = {
+            ["Content-Type"] = "application/json",
+          },
+          body = {
+            hello = "world",
+          },
+        }))
+        ngx.sleep(1)
+        -- check request
+        local file_content = require("pl.utils").readfile(logfile)
+        local json = require("cjson").decode(file_content)
+        assert.same('{"hello":"world"}', json.request.body)
+        -- check response
+        assert.is_nil(json.response.body)
       end)
 
-      describe("response", function()
 
-        pending("logs response body", function()
-          -- TODO: implement
-        end)
 
-        pending("doesn't log request body", function()
-          -- TODO: implement
-        end)
-
+      it("logs only response body", function()
+        assert(client:post("/response/text", {
+          headers = {
+            ["Content-Type"] = "application/json",
+          },
+          body = {
+            hello = "world",
+          },
+        }))
+        ngx.sleep(1)
+        -- check request
+        local file_content = require("pl.utils").readfile(logfile)
+        local json = require("cjson").decode(file_content)
+        assert.is_nil(json.request.body)
+        -- check response
+        assert.is_string(json.response.body)
+        assert.matches('{"hello":"world"}', json.response.body, nil, true)
       end)
 
     end)
-
-
-    -- describe("request", function()
-    --   pending("logs request body", function()
-    --     local r = client:get("/request", {
-    --       headers = {
-    --         host = "test1.com"
-    --       }
-    --     })
-    --     -- validate that the request succeeded, response status 200
-    --     assert.response(r).has.status(200)
-    --     -- now check the request (as echoed by the mock backend) to have the header
-    --     local header_value = assert.request(r).has.header("hello-world")
-    --     -- validate the value of that header
-    --     assert.equal("this is on a request", header_value)
-    --   end)
-    -- end)
 
   end)
 

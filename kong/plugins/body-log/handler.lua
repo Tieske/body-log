@@ -7,7 +7,17 @@ local plugin = {
 
 function plugin:access(conf)
   if conf.request then
-    kong.log.set_serialize_value("request.body", kong.request.get_body())
+    local body
+    if conf.structured then
+      body = kong.request.get_body()
+    end
+    if not body then
+      body = kong.request.get_raw_body()
+    end
+    if not body then
+      body = "failed to retrieve body"
+    end
+    kong.log.set_serialize_value("request.body", body)
   end
   if conf.response then
     kong.service.request.enable_buffering()
@@ -18,7 +28,17 @@ end
 
 function plugin:log(conf)
   if conf.response then
-    kong.log.set_serialize_value("response.body", kong.service.response.get_body())
+    local body
+    if conf.structured then
+      body = kong.service.response.get_body()
+    end
+    if not body then
+      body = kong.service.response.get_raw_body()
+    end
+    if not body then
+      body = "failed to retrieve body"
+    end
+    kong.log.set_serialize_value("response.body", body)
   end
 end
 
