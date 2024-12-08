@@ -1,69 +1,52 @@
 [![Unix build](https://img.shields.io/github/actions/workflow/status/Tieske/kong-plugin-body-log/test.yml?branch=master&label=Test&logo=linux)](https://github.com/Tieske/kong-plugin-body-log/actions/workflows/test.yml)
 [![Luacheck](https://github.com/Tieske/kong-plugin-body-log/workflows/Lint/badge.svg)](https://github.com/Tieske/kong-plugin-body-log/actions/workflows/lint.yml)
 
-Kong plugin template
-====================
+Kong plugin for request & response body logging
+===============================================
 
-This repository contains a very simple Kong plugin template to get you
-up and running quickly for developing your own plugins.
+This plugin will add the request and/or response body to the fields the log-serializer
+will include. As such this plugin doesn't log by itself, it just adds content to the
+existing serializer setup.
 
-This template was designed to work with the
-[`kong-pongo`](https://github.com/Kong/kong-pongo) and
-[`kong-vagrant`](https://github.com/Kong/kong-vagrant) development environments.
+To use it configure this plugin, and also configure a standard log plugin that uses
+the default Kong log serializer (eg. file-log, tcp-log, http-log, etc).
 
-Please check out those repos `README` files for usage instructions. For a complete
-walkthrough check [this blogpost on the Kong website](https://konghq.com/blog/custom-lua-plugin-kong-gateway).
+---
+
+Configuration
+=============
+
+property | type | default | required | description
+-|-|-|-|-
+`request`| bool | `false` | yes | Should the request body be logged?
+`respone`| bool | `false` | yes | Should the response body be logged?
+`structured`| bool | `true` | yes | Structured data is logged as nested JSON, otherwise it will be logged as text.
+
+Structured data means content-types handled by [PDK function `request.get_body`](https://docs.konghq.com/gateway/latest/plugin-development/pdk/kong.request/#kongrequestget_bodymimetype-max_args-max_allowed_file_size):
+
+- `application/x-www-form-urlencoded`
+- `application/json`
+- `multipart/form-data`
 
 
-Naming and versioning conventions
-=================================
+---
 
-There are a number "named" components and related versions. These are the conventions:
+Changelog
+=========
 
-* *Kong plugin name*: This is the name of the plugin as it is shown in the Kong
-  Manager GUI, and the name used in the file system. A plugin named `my-cool-plugin`
-  would have a `handler.lua` file at `./kong/plugins/my-cool-plugin/handler.lua`.
+#### release instructions
 
-* *Kong plugin version*: This is the version of the plugin code, expressed in
-  `x.y.z` format (using Semantic Versioning is recommended). This version should
-  be set in the `handler.lua` file as the `VERSION` property on the plugin table.
+- update changelog below
+- update version in `handler.lua`
+- update the rockspec filename
+- update the rockspec file contents to reflect the same version
+- commit all changes as `release X.Y.Z`
+- tag with `vX.Y.Z`
+- run `pongo pack`
+- test the generated rock file
+- distribute the rock file
 
-* *LuaRocks package name*: This is the name used in the LuaRocks eco system.
-  By convention this is `kong-plugin-[KongPluginName]`. This name is used
-  for the `rockspec` file, both in the filename as well as in the contents
-  (LuaRocks requires that they match).
+### 0.1.0, unreleased
 
-* *LuaRocks package version*: This is the version of the package, and by convention
-  it should be identical to the *Kong plugin version*. As with the *LuaRocks package
-  name* the version is used in the `rockspec` file, both in the filename as well
-  as in the contents (LuaRocks requires that they match).
+- first version.
 
-* *LuaRocks rockspec revision*: This is the revision of the rockspec, and it only
-  changes if the rockspec is updated. So when the source code remains the same,
-  but build instructions change for example. When there is a new *LuaRocks package
-  version* the *LuaRocks rockspec revision* is reset to `1`. As with the *LuaRocks
-  package name* the revision is used in the `rockspec` file, both in the filename
-  as well as in the contents (LuaRocks requires that they match).
-
-* *LuaRocks rockspec name*: this is the filename of the rockspec. This is the file
-  that contains the meta-data and build instructions for the LuaRocks package.
-  The filename is `[package name]-[package version]-[package revision].rockspec`.
-
-Example
--------
-
-* *Kong plugin name*: `my-cool-plugin`
-
-* *Kong plugin version*: `1.4.2` (set in the `VERSION` field inside `handler.lua`)
-
-This results in:
-
-* *LuaRocks package name*: `kong-plugin-my-cool-plugin`
-
-* *LuaRocks package version*: `1.4.2`
-
-* *LuaRocks rockspec revision*: `1`
-
-* *rockspec file*: `kong-plugin-my-cool-plugin-1.4.2-1.rockspec`
-
-* File *`handler.lua`* is located at: `./kong/plugins/my-cool-plugin/handler.lua` (and similar for the other plugin files)
