@@ -8,13 +8,22 @@ This plugin will add the request and/or response body to the fields the log-seri
 will include. As such this plugin doesn't log by itself, it just adds content to the
 existing serializer setup.
 
-To use it configure this plugin, and also configure a standard log plugin that uses
-the default Kong log serializer (eg. file-log, tcp-log, http-log, etc).
+It is the 'plugin version' of [this article](https://support.konghq.com/support/s/article/How-to-add-Request-and-Response-payloads-to-the-logging-plugins)
+explaining how to log bodies using the pre-functions plugin.
+
+When to use this plugin over the pre-functions option?
+In many cases the pre-functions plugin isn't allowed due to the Kong admins not
+allowing to run arbitrary Lua code (even with the sandbox). In those cases this
+plugin offers an alternative, at the cost of having to bundle a custom plugin.
+This plugin also offers a cleaner configuration experience for users.
 
 ---
 
 Configuration
 =============
+
+To use it configure this plugin, and also configure a standard log plugin that uses
+the default Kong log serializer (eg. file-log, tcp-log, http-log, etc).
 
 property | type | default | required | description
 -|-|-|-|-
